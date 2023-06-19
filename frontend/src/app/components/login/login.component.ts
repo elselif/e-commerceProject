@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
 import { SharedModule } from 'src/app/common/shared/shared.module';
+import { AuthService } from './services/auth.service';
+import { ToastrService } from 'ngx-toastr';
+import { LoginModel } from './model/login.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -13,14 +16,24 @@ import { SharedModule } from 'src/app/common/shared/shared.module';
 export class LoginComponent {
 
   constructor(
+    private _auth: AuthService,
     private _toastr: ToastrService,
-  ) { 
-    this._toastr.info('Hello world!');
-  }
+    private _router: Router
+  ) { }
+
 
   login(form:NgForm ){
     if(form.valid){
-      console.log(form.value)
-    }
+     let model = new LoginModel();
+     model.email = form.controls["email"].value;
+     model.password = form.controls["password"].value;
+
+      this._auth.login(model,res=>{
+        this._toastr.success("Giriş Başarılı");
+        localStorage.setItem("token",res.token);
+        localStorage.setItem("user",JSON.stringify(res.user));
+        this._router.navigateByUrl("/");
+      })
   }
+}
 }
